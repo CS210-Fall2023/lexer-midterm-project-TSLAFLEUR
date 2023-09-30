@@ -194,7 +194,7 @@ You must use three file structures.
 Your program will be evaluated for neatness and clarity as well as correctness. You must document your program using comments. You must use a consistent programming style which indicates that you are in control of your thoughts and the program which is being used to actualize them. Sloppy, ambiguous, convoluted, intentionally vague, undocumented, or insufficiently documented programs will be considered substandard and will be marked as such.
 
 ### Hints
-Build your lexer incrementally. For example, start by reading a file and printing its context to the screen. Then build a lexer that recognizes just comments and prints the other words (group of characters separated by white space) with UNK state. Then add an ability to recognize the keywords. Once it has been tested, add the ability to recognize CCX operators. Continue in this fashion until your lexer is complete. Notice that different lexemes might be connected to each other without space, like
+
 ````
 printf("Hello, world\n");
 ````
