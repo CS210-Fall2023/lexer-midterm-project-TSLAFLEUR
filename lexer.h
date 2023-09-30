@@ -15,4 +15,14 @@
 #include <stdio.h>
 #include <string.h>
 
+int comment(int CT,FILE *fp);//
+
+int string(FILE *fp);
+
+int CHAR(FILE *fp);
+
+char num(FILE *fp);
+
+char keyword(FILE *fp,char first,char**keywords);
+
 #endif
