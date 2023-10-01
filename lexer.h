@@ -15,14 +15,14 @@
 #include <stdio.h>
 #include <string.h>
 
-int comment(int CT,FILE *fp);//
+int comment(int CT,FILE *fp,FILE *saveTo);//
 
-int string(FILE *fp);
+int string(FILE *fp,FILE *saveTo);
 
-int CHAR(FILE *fp);
+int CHAR(FILE *fp,FILE *saveTo);
 
-char num(FILE *fp);
+char num(FILE *fp,char first,FILE *saveTo);
 
-char keyword(FILE *fp,char first,char**keywords);
+char keyword(FILE *fp,char first,char**keywords,FILE *saveTo);
 
 #endif
