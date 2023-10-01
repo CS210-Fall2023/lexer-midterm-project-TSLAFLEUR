@@ -1,7 +1,9 @@
 /**
  * @file main.c
  * @author Tyler LaFleur
- * @brief 
+ * @brief This program takes a file and outputs a file of the same name postfixed with .lexer
+ * 		  The file will be broken down in 8 types of lexemes: comments, strings, keywords, character literals, operators, numeric literals, identifiers, and UNK
+ * 		  Each lexeme will appear on a separate line in the file with the lexeme followed by the type of lexeme in paranthesis afterwards.
  * @version 0.1
  * @date 2023-09-14
  * 
@@ -12,22 +14,19 @@
 #include "lexer.h"
 
 int main(int argc, char* argv[]){
-	/*
-	Build your lexer incrementally. For example, start by reading a file and printing its context to the screen. 
-	Then build a lexer that recognizes just comments and prints the other words (group of characters separated by white space) with UNK state. 
-	Then add an ability to recognize the keywords. 
-	Once it has been tested, add the ability to recognize CCX operators. 
-	Continue in this fashion until your lexer is complete. 
-	*/
+	//source and desination files
 	FILE *fp,*saveTo;
+	//set destination file's name
 	char fileName[256];
 	strncpy(fileName,argv[1],256);
 	strncat(fileName,".lexer",7);
+	//open files for reading and writing
 	fp=fopen(argv[1],"r");
 	saveTo=fopen(fileName,"w");
-	char current,
-		 peek;
-	int usedPeek=0;	
+	//necessary variables
+	char current, //where file pointer is currently reading and writing
+		 peek; //one character ahead to check for necessary lexemes and to be used to read character that may not have been printed yet
+	int usedPeek=0;	//flag to use peek char instead of reading new char
 	char * lexemeType[8]={  " (comment)\n",			//0.	/* * /  or //
 							" (string)\n",				//1.	" "
 							" (keyword)\n",			/*2.	accessor and array begin bool case character constant else elsif end exit function
@@ -45,9 +44,9 @@ int main(int argc, char* argv[]){
 					   "mutator","natural","null","of","or","other","out","positive","procedure","range",
 					   "return","struct","subtype","then","type","when","while"};
 	do{
-		if(usedPeek==0){
+		if(usedPeek==0){ //normal instance; read new character from input file and analyze
 			current=fgetc(fp);
-		}else if(usedPeek==1){
+		}else if(usedPeek==1){ //in case peek char was not printed to file yet and still needs to be analysed
 			current=peek;
 			usedPeek=0;
 		}
@@ -56,32 +55,33 @@ int main(int argc, char* argv[]){
 			break;
 		}
 		else if(current==' '||current=='\n'){}
-		//covers part 0 and part of part 4
+		//covers type 0 and part of type 4
 		else if(current=='/'){
 			peek=fgetc(fp);
 			fprintf(saveTo,"%c",current);
-			if(peek=='/'){
+			if(peek=='/'){ // "//"single line comment
 				fprintf(saveTo,"%c",peek);
 				fprintf(saveTo,"%s",lexemeType[comment(1,fp,saveTo)]);
-			}else if (peek=='*'){
+			}else if (peek=='*'){ // "/*" multi line comment
 				fprintf(saveTo,"%c",peek);
 				fprintf(saveTo,"%s",lexemeType[comment(2,fp,saveTo)]);
-			}else{
+			}else{ // '/' operator
 				fprintf(saveTo,"%s",lexemeType[4]);
 				usedPeek=1;
 			}
 		}
-		//covers part 1
-		else if(current=='"'){
+		//covers type 1 
+		else if(current=='"'){ //strings
 			fprintf(saveTo,"%c",current);
 			fprintf(saveTo,"%s",lexemeType[string(fp,saveTo)]);
 		}
-		//covers part 3
-		else if(current=='\''){
+		//covers type 3
+		else if(current=='\''){ //char literals
 			fprintf(saveTo,"%c",current);
 			fprintf(saveTo,"%s",lexemeType[CHAR(fp,saveTo)]);
 		} 
-		//covers part 4
+		//covers type 4
+		//single character operators
 		else if(current=='('||current==')'||current=='+'||current=='-'||current=='|'||current=='&'||current==';'||current==','||current=='['||current==']'){
 			fprintf(saveTo,"%c",current);
 			fprintf(saveTo,"%s",lexemeType[4]);
@@ -89,10 +89,10 @@ int main(int argc, char* argv[]){
 		else if(current==':'){
 			peek=fgetc(fp);
 			fprintf(saveTo,"%c",current);
-			if(peek=='='){
+			if(peek=='='){ // ":=" operator
 				fprintf(saveTo,"%c",peek);
 				fprintf(saveTo,"%s",lexemeType[4]);
-			}else{
+			}else{ // ':' operator
 				fprintf(saveTo,"%s",lexemeType[4]);
 				usedPeek=1;
 			}
@@ -101,10 +101,10 @@ int main(int argc, char* argv[]){
 		else if(current=='.'){
 			peek=fgetc(fp);
 			fprintf(saveTo,"%c",current);
-			if(peek=='.'){
+			if(peek=='.'){ // ".." operator
 				fprintf(saveTo,"%c",peek);
 				fprintf(saveTo,"%s",lexemeType[4]);
-			}else{
+			}else{ // '.' operator
 				fprintf(saveTo,"%s",lexemeType[4]);
 				usedPeek=1;
 			}
@@ -112,16 +112,16 @@ int main(int argc, char* argv[]){
 		else if(current=='<'){
 			peek=fgetc(fp);
 			fprintf(saveTo,"%c",current);
-			if(peek=='<'){
+			if(peek=='<'){ // "<<" operator
 				fprintf(saveTo,"%c",peek);
 				fprintf(saveTo,"%s",lexemeType[4]);
-			}else if(peek=='>'){
+			}else if(peek=='>'){ // "<>" operator
 				fprintf(saveTo,"%c",peek);
 				fprintf(saveTo,"%s",lexemeType[4]);
-			}else if(peek=='='){
+			}else if(peek=='='){ // "<=" operator
 				fprintf(saveTo,"%c",peek);
 				fprintf(saveTo,"%s",lexemeType[4]);
-			}else{
+			}else{ // '<' operator
 				fprintf(saveTo,"%s",lexemeType[4]);
 				usedPeek=1;
 			}
@@ -129,13 +129,13 @@ int main(int argc, char* argv[]){
 		else if(current=='>'){
 			peek=fgetc(fp);
 			fprintf(saveTo,"%c",current);
-			if(peek=='>'){
+			if(peek=='>'){ //">>" operator
 				fprintf(saveTo,"%c",peek);
 				fprintf(saveTo,"%s",lexemeType[4]);
-			}else if(peek=='='){
+			}else if(peek=='='){ //">= operator"
 				fprintf(saveTo,"%c",peek);
 				fprintf(saveTo,"%s",lexemeType[4]);
-			}else{
+			}else{ //'>' operator
 				fprintf(saveTo,"%s",lexemeType[4]);
 				usedPeek=1;
 			}
@@ -143,10 +143,10 @@ int main(int argc, char* argv[]){
 		else if(current=='*'){
 			peek=fgetc(fp);
 			fprintf(saveTo,"%c",current);
-			if(peek=='*'){
+			if(peek=='*'){ //"**" operator
 				fprintf(saveTo,"%c",peek);
 				fprintf(saveTo,"%s",lexemeType[4]);
-			}else{
+			}else{ //'*' operator
 				fprintf(saveTo,"%s",lexemeType[4]);
 				usedPeek=1;
 			}
@@ -154,10 +154,10 @@ int main(int argc, char* argv[]){
 		else if(current=='='){
 			peek=fgetc(fp);
 			fprintf(saveTo,"%c",current);
-			if(peek=='>'){
+			if(peek=='>'){ //"=>" operator
 				fprintf(saveTo,"%c",peek);
 				fprintf(saveTo,"%s",lexemeType[4]);
-			}else{
+			}else{ //'=' operator
 				fprintf(saveTo,"%s",lexemeType[4]);
 				usedPeek=1;
 			}
@@ -165,18 +165,18 @@ int main(int argc, char* argv[]){
 		else if(current=='!'){
 			peek=fgetc(fp);
 			fprintf(saveTo,"%c",current);
-			if(peek=='='){
+			if(peek=='='){ //"!=" operator
 				fprintf(saveTo,"%c",peek);
 				fprintf(saveTo,"%s",lexemeType[4]);
-			}else{
+			}else{ //'!' operator
 				fprintf(saveTo,"%s",lexemeType[4]);
 				usedPeek=1;
 			}
 		}
-		//covers part 5
+		//covers type 5
 		else if(current=='0'||current=='1'||current=='2'||current=='3'||current=='4'||current=='5'||current=='6'||current=='7'||current=='8'||current=='9'){
 			peek=num(fp,current,saveTo);
-			if(peek=='.'){
+			if(peek=='.'){ // in the case of ".."
 				usedPeek=0;
 			}else usedPeek=1;
 		}
